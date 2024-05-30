@@ -104,71 +104,101 @@ function startanalysisbutton_Callback(hObject, eventdata, handles)
         return
     end
 
+    addpath '..\src'
+
     BlockSize = 16;
-    Threshold = 0.4;
+    Threshold = 0.5;
     GradSigma = 1;
     BlockSigma = 7;
     OrientSmoothSigma = 7;
     
-    figure
     % First image processing
+    
+    msgbox('Započeta analiza prve slike!');
+    
     INorm1 = normalization(handles.FirstFingerprintImage);
-    subplot(231)
-    imshow(handles.FirstFingerprintImage);
 
     [INorm1, Mask1] = segmentation(INorm1, Threshold, BlockSize);
-    subplot(232)
-    imshow(INorm1 .* Mask1);
 
     Orientation1 = orientation(INorm1, GradSigma, BlockSigma, OrientSmoothSigma);
     Frequency1 = frequency(INorm1, BlockSize, Orientation1, Mask1);
 
     GaborFilt1 = gabor_filter(handles.FirstFingerprintImage, Orientation1, Frequency1);
-    subplot(233)
-    imshow(im2double(GaborFilt1) .* Mask1);
 
     [Skeletonized1, Endpoints1, Bifurcations1] = minutiae_extraction(GaborFilt1, Mask1);
-    subplot(234)
-    imshow(Skeletonized1 .* Mask1);
 
     [XEndpoints1, YEndpoints1] = find(Endpoints1);
     [XBifurcations1, YBifurcations1] = find(Bifurcations1);
-    subplot(235)
+
+    % Plotting first analysis
+    figure
+    subplot(151)
+    imshow(handles.FirstFingerprintImage);
+    title("Originalni prvi otisak")
+
+    subplot(152)
+    imshow(INorm1 .* Mask1);
+    title("Normalizovan i segmentiran prvi otisak")
+
+    subplot(153)
+    imshow(im2double(GaborFilt1) .* Mask1);
+    title("Prvi otisak nakon Gabor filtra")
+
+    subplot(154)
+    imshow(Skeletonized1 .* Mask1);
+    title("Skeletonizacija prvog otiska")
+
+    subplot(155)
     imshow(Skeletonized1 .* Mask1);
     hold on
     plot(YEndpoints1, XEndpoints1, 'r*'); % Plot endpoints in red
     plot(YBifurcations1, XBifurcations1, 'g*'); % Plot bifurcations in green
     hold off
+    title("Kritične tačke otiska")
     
-    figure
     % Second image processing
+    
+    msgbox('Započeta analiza druge slike!');
+
     INorm2 = normalization(handles.SecondFingerprintImage);
-    subplot(231)
-    imshow(handles.SecondFingerprintImage);
 
     [INorm2, Mask2] = segmentation(INorm2, Threshold, BlockSize);
-    subplot(232)
-    imshow(INorm2 .* Mask2);
 
     Orientation2 = orientation(INorm2, GradSigma, BlockSigma, OrientSmoothSigma);
     Frequency2 = frequency(INorm2, BlockSize, Orientation2, Mask2);
 
     GaborFilt2 = gabor_filter(handles.SecondFingerprintImage, Orientation2, Frequency2);
-    subplot(233)
-    imshow(im2double(GaborFilt2) .* Mask2);
 
     [Skeletonized2, Endpoints2, Bifurcations2] = minutiae_extraction(GaborFilt2, Mask2);
-    subplot(234)
-    imshow(Skeletonized2 .* Mask2);
 
     [XEndpoints2, YEndpoints2] = find(Endpoints2);
     [XBifurcations2, YBifurcations2] = find(Bifurcations2);
-    subplot(235)
+
+    % Plotting second analysis
+    figure
+    subplot(151)
+    imshow(handles.SecondFingerprintImage);
+    title("Originalni drugi otisak")
+
+    subplot(152)
+    imshow(INorm2 .* Mask2);
+    title("Normalizovan i segmentiran drugi otisak")
+
+    subplot(153)
+    imshow(im2double(GaborFilt2) .* Mask2);
+    title("Drugi otisak nakon Gabor filtra")
+
+    subplot(154)
+    imshow(Skeletonized2 .* Mask2);
+    title("Skeletonizacija drugog otiska")
+
+    subplot(155)
     imshow(Skeletonized2 .* Mask2);
     hold on
     plot(YEndpoints2, XEndpoints2, 'r*'); % Plot endpoints in red
     plot(YBifurcations2, XBifurcations2, 'g*'); % Plot bifurcations in green
     hold off
+    title("Kritične tačke otiska")
     
     XEndpoints1 = transpose(XEndpoints1);
     XEndpoints2 = transpose(XEndpoints2);
@@ -192,3 +222,5 @@ function startanalysisbutton_Callback(hObject, eventdata, handles)
     ScoreText = findobj('Tag', 'scoreresult');
     msgbox(strcat('Podudarnost dva otiska prsta: ', num2str(round(Score * 100)), '%'));
     set(ScoreText, 'String', strcat(num2str(round(Score * 100)), '%'));
+
+
